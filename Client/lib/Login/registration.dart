@@ -143,7 +143,10 @@ class _RegistrationState extends State<Registration> {
   }
 
   void _checkd_id_uplication() { // id 중복 체크
-    final options = {"uid": ID_Controller.text};
+    final options = {
+      "uid": ID_Controller.text
+
+    };
     print(ID_Controller.text);
     dio.post("$baseUrl/member/id_check", data: options).then((result) async => {
           print(result.data.toString()),

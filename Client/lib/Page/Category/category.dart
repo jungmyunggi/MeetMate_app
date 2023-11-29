@@ -65,7 +65,7 @@ class _CategoryState extends State<Category> {
             } else if (snapshot.hasError) {
               return Center(child: Text('에러: ${snapshot.error}'));
             } else {
-              dataList =
+              List<Map<String, dynamic>> dataList =
                   snapshot.data as List<Map<String, dynamic>>;
               return SingleChildScrollView(
                 child: Column(
@@ -108,10 +108,11 @@ class _CategoryState extends State<Category> {
                               ],
                             ),
                             onTap: () {
+                             print(dataList.toString());
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => Viewtext(index: index),
+                                  builder: (context) => Viewtext(index: index,dataList: dataList),
                                 ),
                               );
                             },

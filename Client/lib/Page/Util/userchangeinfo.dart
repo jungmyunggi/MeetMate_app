@@ -55,8 +55,7 @@ class _User_moState extends State<User_mo> {
     '봉사활동': detail_hobbys[3],
     '댄스/무용': detail_hobbys[4],
     '문화/공연': detail_hobbys[5],
-    '여가': detail_hobbys[6],
-    '기타': detail_hobbys[7],
+    '기타': detail_hobbys[6],
   };
   final detail_Local = {
     '서울': detail_regions[0],

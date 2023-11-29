@@ -5,18 +5,22 @@ import 'package:flutter/material.dart';
 
 import '../Home/homepage.dart';
 
+
+
 class Viewtext extends StatefulWidget {
   final int index;
-
-  Viewtext({required this.index});
+  List<Map<String, dynamic>> dataList;
+  Viewtext({required this.index,required this.dataList});
 
   @override
   _ViewtextState createState() => _ViewtextState();
 }
 
-class _ViewtextState extends State<Viewtext> {
+class _ViewtextState extends State<Viewtext> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final comment_modify_controller = TextEditingController();
-  late Future<List<Map<String, dynamic>>> futureData;
+  late Future<List<Map<String, dynamic>>> futureData ;
   String comment_text_title = '';
   String comment_text_content = '';
   int i = 0;
@@ -134,10 +138,6 @@ class _ViewtextState extends State<Viewtext> {
     super.initState();
     _scrollController = ScrollController();
     futureData = fetchData();
-
-
-    print(dataList.toString());
-
   }
 
   final commentController = TextEditingController();
@@ -145,14 +145,16 @@ class _ViewtextState extends State<Viewtext> {
 
   Future<List<Map<String, dynamic>>> fetchData() async {
     final options = {
-      "articleId": dataList[widget.index]['id'],
+      "articleId": widget.dataList[widget.index]['id'],
     };
-    print(dataList.toString());
     print(options);
     try {
       Response result = await dio.post("$baseUrl/comment/list", data: options);
-      List<Map<String, dynamic>> data =
-          List<Map<String, dynamic>>.from(result.data);
+      late List<Map<String, dynamic>> data;
+      setState(() {
+         data =
+        List<Map<String, dynamic>>.from(result.data);
+      });
       return data;
     } catch (error) {
       throw Exception('데이터를 불러오는 데 실패했습니다.');
@@ -161,8 +163,9 @@ class _ViewtextState extends State<Viewtext> {
 
   void Delete_post() {
     final options = {
-      "id": dataList[widget.index]['id'],
+      "id": widget.dataList[widget.index]['id'],
     };
+    print(options);
     dio.post("$baseUrl/article/delete", data: options).then(
       (result) {
         setState(() {
@@ -176,7 +179,7 @@ class _ViewtextState extends State<Viewtext> {
 
   void postcomment() {
     final options = {
-      "articleId": dataList[widget.index]["id"],
+      "articleId": widget.dataList[widget.index]["id"],
       "nickname": user.User_Nic,
       "content": commentController.text,
     };
@@ -207,14 +210,14 @@ class _ViewtextState extends State<Viewtext> {
         PopupMenuItem(
             child: Text('초대장 보내기'),
             onTap: () {
-              print(dataList[widget.index]['nickname'].toString());
+              print(widget.dataList[widget.index]['nickname'].toString());
               print(user.User_Nic);
-              if (dataList[widget.index]['nickname']
+              if (widget.dataList[widget.index]['nickname']
                       .toString()
                       .compareTo(user.User_Nic) ==
                   0) {
                 final options = {
-                  'articleId': dataList[widget.index]['id'],
+                  'articleId': widget.dataList[widget.index]['id'],
                   'sender': user.User_Nic,
                   'receiver': reviewList[index]['nickname'],
                 };
@@ -251,6 +254,7 @@ class _ViewtextState extends State<Viewtext> {
   }
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder(
       future: futureData,
       builder: (context, snapshot) {
@@ -268,205 +272,197 @@ class _ViewtextState extends State<Viewtext> {
           reviewList = snapshot.data as List<Map<String, dynamic>>;
           return Scaffold(
             resizeToAvoidBottomInset: true,
-            appBar: AppBar(title: Text(dataList[widget.index]['title'])),
-            body: RefreshIndicator(
-              onRefresh: () async {
-                setState(() async {
-                  refresh();
-                });
-              },
+            appBar: AppBar(title: Text(widget.dataList[widget.index]['title'])),
+            body: SizedBox(
+              height: MediaQuery.of(context).size.height * 10,
               child: SingleChildScrollView(
-                controller: _scrollController,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 10,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              dataList[widget.index]['nickname'],
-                              style: TextStyle(fontSize: 30),
-                            ),
-                            Padding(padding: EdgeInsets.only(bottom: 20)),
-                            Text(
-                              dataList[widget.index]['content'],
-                              style: TextStyle(fontSize: 25),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 20),
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      dataList[widget.index]['location'],
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 10),
-                                    ),
-                                    Text(dataList[widget.index]['meetTime'],
-                                        style: TextStyle(
-                                            color: Colors.grey, fontSize: 10)),
-                                    Expanded(child: SizedBox()),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        if (dataList[widget.index]['nickname']
-                                                    .toString()
-                                                    .compareTo(user.User_Nic) ==
-                                                0 ||
-                                            user.User_Nic.compareTo("admin") ==
-                                                0) {
-                                          setState(() {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    Modify(index: widget.index),
-                                              ),
-                                            );
-                                          });
-                                        }
-                                      },
-                                      child: Text('수정'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        if (dataList[widget.index]['nickname']
-                                                    .toString()
-                                                    .compareTo(user.User_Nic) ==
-                                                0 ||
-                                            user.User_Nic.compareTo("admin") ==
-                                                0) {
-                                          Delete_post();
-                                        }
-                                      },
-                                      child: Text('삭제'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey,
-                              width: 5,
-                            ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.dataList[widget.index]['nickname'],
+                            style: TextStyle(fontSize: 30),
                           ),
-                        ),
-                      ),
-
-                      //댓글 보기
-                      Column(
-                        children: List.generate(
-                          reviewList.length,
-                          (index) => ListTile(
-                            title: Align(
+                          Padding(padding: EdgeInsets.only(bottom: 20)),
+                          Text(
+                           widget.dataList[widget.index]['content'],
+                            style: TextStyle(fontSize: 25),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 20),
+                            child: Align(
+                              alignment: Alignment.centerRight,
                               child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Row(
-                                    children: [
-                                      TextButton(
-                                          onPressed: () {
-                                            _showPopupMenu(context, index);
-                                          },
-                                          child: Text(
-                                              '${reviewList[index]['nickname']}')),
-                                      Text(
-                                        ': '
-                                        '${reviewList[index]['content']}',
-                                      ),
-                                    ],
+                                  Text(
+                                    widget.dataList[widget.index]['location'],
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 10),
                                   ),
+                                  Text(widget.dataList[widget.index]['meetTime'],
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 10)),
                                   Expanded(child: SizedBox()),
-                                  PopupMenuButton(
-                                    itemBuilder: (context) {
-                                      return [
-                                        PopupMenuItem(
-                                          child: Text('수정'),
-                                          onTap: () {
-                                            i = index;
-                                            if (reviewList[index]['nickname']
-                                                    .toString()
-                                                    .contains(user.User_Nic) ||
-                                                user.User_Nic.compareTo(
-                                                        "admin") ==
-                                                    0) {
-                                              setState(() {
-                                                _modify_comment(context);
-                                              });
-                                            } else {
-                                              setState(() {
-                                                comment_text_title = '실패';
-                                                comment_text_content =
-                                                    '권한이 없습니다';
-                                                _comment_Dialog(context);
-                                              });
-                                            }
-                                          },
-                                        ),
-                                        PopupMenuItem(
-                                          child: Text('삭제'),
-                                          onTap: () {
-                                            if (reviewList[index]['nickname']
-                                                    .toString()
-                                                    .contains(user.User_Nic) ||
-                                                user.User_Nic.compareTo(
-                                                        "admin") ==
-                                                    0) {
-                                              setState(() {
-                                                comment_text_title = '성공';
-                                                comment_text_content =
-                                                    '댓글을 삭제했습니다';
-                                                final options = {
-                                                  "id": reviewList[index]
-                                                      ["commentId"],
-                                                };
-                                                print(options);
-                                                dio
-                                                    .post(
-                                                        "$baseUrl/comment/delete",
-                                                        data: options)
-                                                    .then(
-                                                  (result) {
-                                                    setState(() {
-                                                      futureData = fetchData();
-                                                      _comment_Dialog(context);
-                                                      commentController.clear();
-                                                    });
-                                                  },
-                                                ).catchError((error) {
-                                                  print(error);
-                                                });
-                                              });
-                                            } else {
-                                              setState(() {
-                                                comment_text_title = '실패';
-                                                comment_text_content =
-                                                    '권한이 없습니다';
-                                                _comment_Dialog(context);
-                                              });
-                                            }
-                                          },
-                                        )
-                                      ];
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      if (widget.dataList[widget.index]['nickname']
+                                                  .toString()
+                                                  .compareTo(user.User_Nic) ==
+                                              0 ||
+                                          user.User_Nic.compareTo("admin") ==
+                                              0) {
+                                        setState(() {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Modify(index: widget.index,dataList: widget.dataList),
+                                            ),
+                                          );
+                                        });
+                                      }
                                     },
-                                  )
+                                    child: Text('수정'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      if (widget.dataList[widget.index]['nickname']
+                                                  .toString()
+                                                  .compareTo(user.User_Nic) ==
+                                              0 ||
+                                          user.User_Nic.compareTo("admin") ==
+                                              0) {
+                                        Delete_post();
+                                      }
+                                    },
+                                    child: Text('삭제'),
+                                  ),
                                 ],
                               ),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.grey,
+                            width: 5,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    //댓글 보기
+                    Column(
+                      children: List.generate(
+                        reviewList.length,
+                        (index) => ListTile(
+                          title: Align(
+                            child: Row(
+                              children: [
+                                Row(
+                                  children: [
+                                    TextButton(
+                                        onPressed: () {
+                                          _showPopupMenu(context, index);
+                                        },
+                                        child: Text(
+                                            '${reviewList[index]['nickname']}')),
+                                    Text(
+                                      ': '
+                                      '${reviewList[index]['content']}',
+                                    ),
+                                  ],
+                                ),
+                                Expanded(child: SizedBox()),
+                                PopupMenuButton(
+                                  itemBuilder: (context) {
+                                    return [
+                                      PopupMenuItem(
+                                        child: Text('수정'),
+                                        onTap: () {
+                                          i = index;
+                                          if (reviewList[index]['nickname']
+                                                  .toString()
+                                                  .contains(user.User_Nic) ||
+                                              user.User_Nic.compareTo(
+                                                      "admin") ==
+                                                  0) {
+                                            setState(() {
+                                              _modify_comment(context);
+                                            });
+                                          } else {
+                                            setState(() {
+                                              comment_text_title = '실패';
+                                              comment_text_content =
+                                                  '권한이 없습니다';
+                                              _comment_Dialog(context);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                      PopupMenuItem(
+                                        child: Text('삭제'),
+                                        onTap: () {
+                                          if (reviewList[index]['nickname']
+                                                  .toString()
+                                                  .contains(user.User_Nic) ||
+                                              user.User_Nic.compareTo(
+                                                      "admin") ==
+                                                  0) {
+                                            setState(() {
+                                              comment_text_title = '성공';
+                                              comment_text_content =
+                                                  '댓글을 삭제했습니다';
+                                              final options = {
+                                                "id": reviewList[index]
+                                                    ["commentId"],
+                                              };
+                                              print(options);
+                                              dio
+                                                  .post(
+                                                      "$baseUrl/comment/delete",
+                                                      data: options)
+                                                  .then(
+                                                (result) {
+                                                  setState(() {
+                                                    futureData = fetchData();
+                                                    _comment_Dialog(context);
+                                                    commentController.clear();
+                                                  });
+                                                },
+                                              ).catchError((error) {
+                                                print(error);
+                                              });
+                                            });
+                                          } else {
+                                            setState(() {
+                                              comment_text_title = '실패';
+                                              comment_text_content =
+                                                  '권한이 없습니다';
+                                              _comment_Dialog(context);
+                                            });
+                                          }
+                                        },
+                                      )
+                                    ];
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -482,9 +478,6 @@ class _ViewtextState extends State<Viewtext> {
                     width: MediaQuery.of(context).size.width * 0.85,
                     height: 50,
                     child: TextField(
-                      onTap: (){
-                        print(dataList.toString());
-                      },
                       decoration:
                           InputDecoration(hintText: "댓글을 입력하세요...(20자 이내)"),
                       controller: commentController,

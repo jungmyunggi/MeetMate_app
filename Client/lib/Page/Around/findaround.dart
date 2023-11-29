@@ -67,7 +67,7 @@ class _AroundState extends State<Around> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('에러: ${snapshot.error}'));
                 } else {
-                  dataList =
+                  List<Map<String, dynamic>> dataList =
                   snapshot.data as List<Map<String, dynamic>>;
                   print(dataList);
                   return SingleChildScrollView(
@@ -114,7 +114,7 @@ class _AroundState extends State<Around> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Viewtext(index: index),
+                                      builder: (context) => Viewtext(index: index,dataList: dataList),
                                     ),
                                   );
                                 },

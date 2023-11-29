@@ -90,7 +90,7 @@ refresh() { // 새로고침시 나오는 알림창
   );
 }
 late Future<List<Map<String, dynamic>>> futureDataList; // 글 정보를 모두 저장하는 변수
-late List<Map<String, dynamic>> dataList; // 글 정보를 리스트화 해서 출력 가능한 상태로 저장하는 변수
+ // 글 정보를 리스트화 해서 출력 가능한 상태로 저장하는 변수
 late BuildContext navigatorContext; // 현재 사용자가 보고있는 페이지에 대한 정보 저장하는 변수
 late List<Map<String, dynamic>> reviewList; // 글에 달린 댓글을 저장하는 변수
 User user = User(); // 유저 객체 생성

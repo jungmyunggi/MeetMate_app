@@ -8,7 +8,8 @@ import '../Home/homepage.dart';
 
 class Modify extends StatefulWidget {
   final int index;
-  Modify({required this.index});
+  List<Map<String, dynamic>> dataList;
+  Modify({required this.index,required this.dataList});
   @override
   State<Modify> createState() => _ModifyState();
 }
@@ -26,10 +27,10 @@ class _ModifyState extends State<Modify> {
   String selectedLocal_detail = '강남구';
   void initState(){
     super.initState();
-    content_controller.text = dataList[widget.index]['content'];
-    title_controller.text = dataList[widget.index]['title'];
-    chat_controller.text = dataList[widget.index]['chat'];
-    time_controller.text = dataList[widget.index]['meetTime'];
+    content_controller.text = widget.dataList[widget.index]['content'];
+    title_controller.text = widget.dataList[widget.index]['title'];
+    chat_controller.text = widget.dataList[widget.index]['chat'];
+    time_controller.text = widget.dataList[widget.index]['meetTime'];
   }
   _successDialog(BuildContext context) {
     showDialog(
@@ -79,8 +80,7 @@ class _ModifyState extends State<Modify> {
     '봉사활동': detail_hobbys[3],
     '댄스/무용': detail_hobbys[4],
     '문화/공연': detail_hobbys[5],
-    '여가': detail_hobbys[6],
-    '기타':detail_hobbys[7],
+    '기타':detail_hobbys[6],
   };
   final detail_Local = {
     '서울': detail_regions[0],
